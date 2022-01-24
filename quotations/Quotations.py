@@ -16,4 +16,9 @@ def get_quotation(name):
     return name
 
 
-
+# 语录类
+class Quotation(BaseModel):
+    id: str
+    name: str
+    time: Optional[datetime] = None
+    content: str

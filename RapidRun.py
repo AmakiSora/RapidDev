@@ -3,7 +3,11 @@
 """
 import uvicorn
 from fastapi import FastAPI
-from quotations import app_quotation
+
+from mysql.Database import engine
+from quotations import app_quotation, QuotationModels
+
+QuotationModels.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

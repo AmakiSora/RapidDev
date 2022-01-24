@@ -9,7 +9,10 @@ from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 app = FastAPI()
 
 
-@app.get('/')
+@app.get('/',
+         summary='你好,世界!',
+         description='接口简介',
+         response_description='返回简介')
 def hello_world():
     """HelloWorld"""
     return "Hello,world!"
