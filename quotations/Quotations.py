@@ -19,11 +19,21 @@ def get_quotation(name):
 
 # 上传语录
 @app_quotation.post('/upload')
-async def upload_quotation(file:UploadFile = File(...)):
+async def upload_quotation(file: UploadFile = File(...)):
     content = await file.read()
-    one = re.finditer(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [^\n]*", content.decode('utf-8'))
-    for i in one:
-        print(i.group())
+    two = re.finditer(r"[^\n]*", content.decode('utf-8'))
+    c = ''
+    for i in two:
+        strr = i.group()
+        header = re.match(r"(?P<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<name>[^\n]*)", strr)
+        print('for里的' + c)
+        if header is not None:
+            print('if里的' + c)
+            c = ''
+            print(datetime.strptime(header.group('time'), '%Y-%m-%d %H:%M:%S'))
+            print(header.group('name'))
+        else:
+            c += strr
     return ''
 
 
