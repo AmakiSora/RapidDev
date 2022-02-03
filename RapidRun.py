@@ -4,10 +4,10 @@
 import uvicorn
 from fastapi import FastAPI
 
-from mysql.Database import engine
-from quotations import app_quotation, QuotationModels
+from Setting import engine
+from quotations import app_quotation, Models
 
-QuotationModels.Base.metadata.create_all(bind=engine)
+Models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

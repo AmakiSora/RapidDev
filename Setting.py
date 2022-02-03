@@ -5,9 +5,10 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
 # 引用外部配置文件
 parser = ConfigParser()
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 
 # 配置文件路径
 if os.path.exists(os.path.join(BASE_DIR, 'config_local.conf')):
@@ -20,6 +21,8 @@ else:
 # 读取配置文件
 parser.read(conf_path)
 
+# -----------------------------------------------------------------------------------------------------
+# mysql配置
 SQLALCHEMY_DATABASE_URL = parser.get('mysql', 'url')
 
 engine = create_engine(
@@ -28,3 +31,4 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+# -----------------------------------------------------------------------------------------------------

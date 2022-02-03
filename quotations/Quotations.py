@@ -1,14 +1,25 @@
 import re
 from datetime import datetime
-from typing import Optional
 
-from fastapi import APIRouter, UploadFile, File
-from pydantic import BaseModel
+from fastapi import APIRouter, UploadFile, File, Depends
+from sqlalchemy.orm import Session
+
+from Setting import SessionLocal
+from quotations import Models, Crud
 
 """
     语录
 """
 app_quotation = APIRouter()
+
+
+# 获取数据库连接
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 # 获取一条语录
@@ -17,29 +28,34 @@ def get_quotation(name):
     return name
 
 
-# 上传语录
+# 上传qq聊天记录(txt)
 @app_quotation.post('/upload')
-async def upload_quotation(file: UploadFile = File(...)):
+async def upload_quotation(file: UploadFile = File(...), db: Session = Depends(get_db)):
     content = await file.read()
-    two = re.finditer(r"[^\n]*", content.decode('utf-8'))
-    c = ''
-    for i in two:
-        strr = i.group()
-        header = re.match(r"(?P<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<name>[^\n]*)", strr)
-        print('for里的' + c)
+    line = re.finditer(r"[^\n]*", content.decode('utf-8'))
+    text = ''
+    cr = Models.ChatRecord()
+    # 以换行符为间隔进行数据处理
+    for i in line:
+        data = i.group()
+        header = re.match(r"(?P<time>\d{4}-\d{2}-\d{2} \d*:\d{2}:\d{2}) (?P<name>[^\n]*)", data)
         if header is not None:
-            print('if里的' + c)
-            c = ''
-            print(datetime.strptime(header.group('time'), '%Y-%m-%d %H:%M:%S'))
-            print(header.group('name'))
+            text = re.sub(r'[\r]', '', text)
+            print(text)
+            cr.content = text
+            # 保存
+            Crud.add_ChatRecord(db, cr)
+            print()
+            # 重置
+            cr = Models.ChatRecord()
+            text = ''
+            time = datetime.strptime(header.group('time'), '%Y-%m-%d %H:%M:%S')
+            print(time)
+            cr.time = time
+            name = header.group('name')
+            print(name)
+            cr.name = name
         else:
-            c += strr
-    return ''
+            text += data
+    return '完成!'
 
-
-# 语录类
-class Quotation(BaseModel):
-    id: str
-    name: str
-    time: Optional[datetime] = None
-    content: str
