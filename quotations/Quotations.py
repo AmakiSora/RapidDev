@@ -32,9 +32,11 @@ def get_quotation(name):
 @app_quotation.post('/upload')
 async def upload_quotation(file: UploadFile = File(...), db: Session = Depends(get_db)):
     content = await file.read()
+    print(content)
     line = re.finditer(r"[^\n]*", content.decode('utf-8'))
     text = ''
     cr = Models.ChatRecord()
+    crList = []
     # 以换行符为间隔进行数据处理
     for i in line:
         data = i.group()
@@ -43,8 +45,7 @@ async def upload_quotation(file: UploadFile = File(...), db: Session = Depends(g
             text = re.sub(r'[\r]', '', text)
             print(text)
             cr.content = text
-            # 保存
-            Crud.add_ChatRecord(db, cr)
+            crList.append(cr)
             print()
             # 重置
             cr = Models.ChatRecord()
@@ -53,9 +54,12 @@ async def upload_quotation(file: UploadFile = File(...), db: Session = Depends(g
             print(time)
             cr.time = time
             name = header.group('name')
+            name = re.sub(r'[\r]', '', name)
             print(name)
             cr.name = name
         else:
             text += data
+    # 保存
+    Crud.batch_add_ChatRecord(db, crList)
     return '完成!'
 
