@@ -20,7 +20,7 @@ def add_ChatRecord(db: Session, cr: Models.ChatRecord):
 
 # 批量增
 def batch_add_ChatRecord(db: Session, crList: List[Models.ChatRecord]):
-    crList = check_ChatRecord(db, crList)
+    crList = check_ChatRecord(crList)
     for cr in crList:
         db.add(cr)
     db.commit()
@@ -34,7 +34,7 @@ def get_ChatRecord(db: Session, cr: Models.ChatRecord):
 
 
 # 校验
-def check_ChatRecord(db: Session, crList: List[Models.ChatRecord]):
+def check_ChatRecord(crList: List[Models.ChatRecord]):
     print('------------------------------校验中------------------------------')
     newList = []
     ThreadUtil.multithreading_list(crList, multithreadingProcessing, (newList,))
@@ -46,8 +46,9 @@ def multithreadingProcessing(cr, newList):
     if cr.name is None or \
             cr.name == '' or \
             cr.content is None or \
-            cr.content == '':
-        print('name或者content为空!')
+            cr.content == '' or \
+            cr.content == '[图片]':
+        print('无效记录!')
         return '无效记录', None
     # 用session工厂创建
     db = SingleSession()
