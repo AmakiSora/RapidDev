@@ -4,7 +4,7 @@ from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 # 引用外部配置文件
 parser = ConfigParser()
@@ -28,7 +28,12 @@ SQLALCHEMY_DATABASE_URL = parser.get('mysql', 'url')
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
 )
+# 共享的session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# 多线程创建多个session用
+SessionFactory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SingleSession = scoped_session(SessionFactory)
 
 Base = declarative_base()
 # -----------------------------------------------------------------------------------------------------
