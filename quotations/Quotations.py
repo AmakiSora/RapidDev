@@ -13,7 +13,7 @@ from quotations import Models, Crud
 app_quotation = APIRouter()
 
 
-# 获取数据库连接
+# 获取数据库连接(单例)
 def get_db():
     db = SessionLocal()
     try:
@@ -32,7 +32,6 @@ def get_quotation(name):
 @app_quotation.post('/upload')
 async def upload_quotation(file: UploadFile = File(...), db: Session = Depends(get_db)):
     content = await file.read()
-    print(content)
     line = re.finditer(r"[^\n]*", content.decode('utf-8'))
     text = ''
     cr = Models.ChatRecord()
@@ -60,6 +59,6 @@ async def upload_quotation(file: UploadFile = File(...), db: Session = Depends(g
         else:
             text += data
     # 保存
-    Crud.batch_add_ChatRecord(db, crList)
-    return '完成!'
-
+    result = Crud.batch_add_ChatRecord(db, crList)
+    print('成功添加 ' + str(result) + ' 条聊天记录!')
+    return '成功添加 ' + str(result) + ' 条聊天记录!'

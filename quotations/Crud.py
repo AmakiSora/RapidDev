@@ -3,7 +3,9 @@ from typing import List
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+from Setting import SingleSession
 from quotations import Models
+from utils import ThreadUtil
 
 
 # 增
@@ -20,11 +22,9 @@ def add_ChatRecord(db: Session, cr: Models.ChatRecord):
 def batch_add_ChatRecord(db: Session, crList: List[Models.ChatRecord]):
     crList = check_ChatRecord(db, crList)
     for cr in crList:
-        if cr.name is None or cr.content is None:
-            continue
         db.add(cr)
     db.commit()
-    return 'ok'
+    return len(crList)
 
 
 # 查
@@ -37,15 +37,27 @@ def get_ChatRecord(db: Session, cr: Models.ChatRecord):
 def check_ChatRecord(db: Session, crList: List[Models.ChatRecord]):
     print('------------------------------校验中------------------------------')
     newList = []
-    for cr in crList:
-        sss = get_ChatRecord(db, cr)
-        if cr.name is None or\
-                cr.name == '' or\
-                cr.content is None or\
-                cr.content == '':
-            print('name或者content为空!')
-        elif sss is not None:
-            print('已存在:' + sss.name + sss.content)
-        else:
-            newList.append(cr)
+    ThreadUtil.multithreading_list(crList, multithreadingProcessing, (newList,))
     return newList
+
+
+# 校验多线程处理
+def multithreadingProcessing(cr, newList):
+    if cr.name is None or \
+            cr.name == '' or \
+            cr.content is None or \
+            cr.content == '':
+        print('name或者content为空!')
+        return '无效记录', None
+    # 用session工厂创建
+    db = SingleSession()
+    # 查询
+    sss = get_ChatRecord(db, cr)
+    # 关闭连接
+    db.close()
+    if sss is not None:
+        print('已存在,name:' + sss.name + ' content:' + sss.content)
+        return '已存在', None
+    else:
+        newList.append(cr)
+        return '成功', None
