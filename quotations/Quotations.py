@@ -1,3 +1,4 @@
+import random
 import re
 from datetime import datetime
 
@@ -6,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from Setting import SessionLocal
 from quotations import Models, Crud
+from quotations.Models import RandomOutChatRecord
 
 """
     语录
@@ -22,10 +24,18 @@ def get_db():
         db.close()
 
 
-# 获取一条语录
-@app_quotation.get('/{name}')
-def get_quotation(name):
-    return name
+# 随机获取一条语录
+@app_quotation.get('/getOne/{name}')
+def get_quotation_random(name, db: Session = Depends(get_db)):
+    count = Crud.get_ChatRecord_name_count(db, name)
+    NO = random.randint(1, count)
+    cr = Crud.get_ChatRecord_random(db, name, NO)
+    out = RandomOutChatRecord()
+    out.name = cr.name
+    out.time = cr.time
+    out.content = cr.content
+    print(out.__dict__)
+    return out
 
 
 # 上传qq聊天记录(txt)

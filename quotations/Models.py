@@ -12,3 +12,10 @@ class ChatRecord(Base):
     content = Column(String(2048), comment='内容')
     time = Column(DateTime, default=None, comment='时间')
     created_time = Column(DateTime, server_default=func.now(), comment='入库时间')
+
+
+# 随机输出类
+class RandomOutChatRecord:
+    name = str
+    content = str
+    time = DateTime

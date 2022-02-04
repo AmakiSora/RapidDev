@@ -17,7 +17,7 @@ app.include_router(app_quotation, prefix='/quotation', tags=['语录集'])
 # HelloWorld
 @app.get('/')
 def RapidDev():
-    return 'This is RapidDev V1.1.10'
+    return 'This is RapidDev V1.1.11'
 
 
 if __name__ == '__main__':

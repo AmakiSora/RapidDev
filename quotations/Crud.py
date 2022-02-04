@@ -27,10 +27,14 @@ def batch_add_ChatRecord(db: Session, crList: List[Models.ChatRecord]):
     return len(crList)
 
 
-# 查
-def get_ChatRecord(db: Session, cr: Models.ChatRecord):
-    return db.query(Models.ChatRecord).filter(
-        and_(Models.ChatRecord.name == cr.name, Models.ChatRecord.content == cr.content)).first()
+# 获取条数(name)
+def get_ChatRecord_name_count(db: Session, name: str):
+    return db.query(Models.ChatRecord).filter(Models.ChatRecord.name == name).count()
+
+
+# 随机查询(name)
+def get_ChatRecord_random(db: Session, name: str, NO: int):
+    return db.query(Models.ChatRecord).filter(Models.ChatRecord.name == name).offset(NO).first()
 
 
 # 校验
@@ -39,6 +43,12 @@ def check_ChatRecord(crList: List[Models.ChatRecord]):
     newList = []
     ThreadUtil.multithreading_list(crList, multithreadingProcessing, (newList,))
     return newList
+
+
+# 校验查询(name,content)
+def get_ChatRecord_check(db: Session, cr: Models.ChatRecord):
+    return db.query(Models.ChatRecord).filter(
+        and_(Models.ChatRecord.name == cr.name, Models.ChatRecord.content == cr.content)).first()
 
 
 # 校验多线程处理
@@ -53,7 +63,7 @@ def multithreadingProcessing(cr, newList):
     # 用session工厂创建
     db = SingleSession()
     # 查询
-    sss = get_ChatRecord(db, cr)
+    sss = get_ChatRecord_check(db, cr)
     # 关闭连接
     db.close()
     if sss is not None:
