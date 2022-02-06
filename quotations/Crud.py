@@ -37,6 +37,15 @@ def get_ChatRecord_random(db: Session, name: str, NO: int):
     return db.query(Models.ChatRecord).filter(Models.ChatRecord.name == name).offset(NO).first()
 
 
+# 模糊查询(name,content)
+def fuzzy_search(name, content, db: Session):
+    if name:
+        return db.query(Models.ChatRecord).filter(
+            and_(Models.ChatRecord.name == name, Models.ChatRecord.content.like(content))).all()
+    else:
+        return db.query(Models.ChatRecord).filter(Models.ChatRecord.content.like(content)).all()
+
+
 # 校验
 def check_ChatRecord(crList: List[Models.ChatRecord]):
     print('------------------------------校验中------------------------------')

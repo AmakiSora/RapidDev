@@ -38,6 +38,18 @@ def get_quotation_random(name, db: Session = Depends(get_db)):
     return out
 
 
+# 模糊搜索语录
+@app_quotation.get('/fuzzySearch')
+def fuzzy_search_name(content, name='', db: Session = Depends(get_db)):
+    print(name)
+    print(content)
+    l = Crud.fuzzy_search(name, content, db)
+    if l:
+        return l
+    else:
+        return '不存在相关语录!'
+
+
 # 上传qq聊天记录(txt)
 @app_quotation.post('/upload')
 async def upload_quotation(file: UploadFile = File(...), db: Session = Depends(get_db)):
